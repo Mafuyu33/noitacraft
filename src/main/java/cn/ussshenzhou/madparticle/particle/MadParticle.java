@@ -1,9 +1,11 @@
 package cn.ussshenzhou.madparticle.particle;
 
+import cn.ussshenzhou.madparticle.command.inheritable.InheritableBoolean;
 import cn.ussshenzhou.madparticle.mixin.ParticleEngineAccessor;
 import cn.ussshenzhou.madparticle.mixinproxy.ITickType;
 import cn.ussshenzhou.madparticle.network.MadParticleHurtPacket;
 import cn.ussshenzhou.madparticle.particle.enums.ChangeMode;
+import cn.ussshenzhou.madparticle.particle.enums.ParticleRenderTypes;
 import cn.ussshenzhou.madparticle.particle.enums.SpriteFrom;
 import cn.ussshenzhou.madparticle.particle.enums.TakeOver;
 import cn.ussshenzhou.madparticle.util.AABBHelper;
@@ -21,7 +23,6 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.phys.AABB;
@@ -80,6 +81,8 @@ public class MadParticle extends TextureSheetParticle {
     private int disappearOnBlockCollision = 0;
     private int disappearOnEntityCollision = 0;
     private int entityCollisionCount = 0;
+    private int trailInterval = 0;
+    protected final ParticleType<?> particleType;
 
     public TimeMode timeMode = TimeMode.NORMAL;
     private float[] xTrack = null;
@@ -103,11 +106,13 @@ public class MadParticle extends TextureSheetParticle {
                        float rollSpeed,
                        float xDeflection, float xDeflectionAfterCollision, float zDeflection, float zDeflectionAfterCollision,
                        float bloomFactor,
-                       CompoundTag meta
+                       CompoundTag meta,
+                       ParticleType<?> particleType
     ) {
         super(pLevel, pX, pY, pZ);
         this.sprites = spriteSet;
         this.spriteFrom = spriteFrom;
+        this.particleType = particleType;
         switch (spriteFrom) {
             case AGE -> this.setSpriteFromAge(spriteSet);
             default -> this.pickSprite(spriteSet);
@@ -175,6 +180,9 @@ public class MadParticle extends TextureSheetParticle {
         }
         if (meta.contains(DAMAGE_ON_HIT.get())) {
             damageOnHit = meta.getInt(DAMAGE_ON_HIT.get());
+        }
+        if (meta.contains(TRAIL_INTERVAL.get())) {
+            trailInterval = meta.getInt(TRAIL_INTERVAL.get());
         }
         handleLight();
         handlePreCalculate();
@@ -399,6 +407,57 @@ public class MadParticle extends TextureSheetParticle {
                 this.zDeflection = zDeflectionInitial;
             }
         }
+        //trail
+        if (trailInterval > 0 && age % trailInterval == 0) {
+            boolean dyingSoon = (lifetime - age) <= 5;
+
+            double tx = Mth.lerp(0.3, this.xo, this.x);
+            double ty = Mth.lerp(0.3, this.yo, this.y);
+            double tz = Mth.lerp(0.3, this.zo, this.z);
+
+            if (dyingSoon) {
+                tx += (random.nextFloat() - 0.5f) * 0.3f;
+                ty += (random.nextFloat() - 0.5f) * 0.3f;
+                tz += (random.nextFloat() - 0.5f) * 0.3f;
+            }
+
+            float vx = dyingSoon ? (random.nextFloat() - 0.5f) * 0.05f : 0f;
+            float vy = dyingSoon ? (random.nextFloat() - 0.5f) * 0.05f : 0f;
+            float vz = dyingSoon ? (random.nextFloat() - 0.5f) * 0.05f : 0f;
+
+            MadParticleOption trail = new MadParticleOption(
+                    BuiltInRegistries.PARTICLE_TYPE.getId(this.particleType), // targetParticle (int)
+                    this.spriteFrom, // SpriteFrom
+                    10, // lifeTime
+                    InheritableBoolean.TRUE, // alwaysRender
+                    1, // amount
+                    tx, ty, tz, // px, py, pz
+                    0f, 0f, 0f, // x/y/zDiffuse
+                    vx, vy, vz, // vx/y/z
+                    0.01F, 0.01F, 0.01F, // vx/y/zDiffuse
+                    1f, // friction
+                    0f, // gravity
+                    InheritableBoolean.FALSE, // collision
+                    0, // bounceTime
+                    0f, 0f, // hCollideDiffuse, vCollideBounce
+                    0f, 0f, // afterCollisionFriction/Gravity
+                    InheritableBoolean.FALSE, // interactWithEntity
+                    0f, 0f, // interactFactors
+                    getRenderTypeEnum(this.particleRenderType), //renderType
+                    rCol, gCol, bCol, // r/g/b
+                    this.alpha, (float) 0, ChangeMode.LINEAR, // alpha
+                    this.scale * 0.5f, this.scale * 0.3f, ChangeMode.LINEAR,// scale
+                    false, null, // haveChild, child
+                    0f, // rollSpeed
+                    0f, 0f, // xDeflection, xDeflectionAfter
+                    0f, 0f, // zDeflection, zDeflectionAfter
+                    bloomFactor, // bloom
+                    new CompoundTag() // meta
+            );
+
+            AddParticleHelper.addParticleClientAsync2Async(trail.inheritOrContinue(this), this.roll);
+        }
+
         //dx dy dz, gravity and deflection, and friction
         if (this.dyComplex != null) {
             this.yd = MathHelper.getFromT((float) age / lifetime, dyComplex);
@@ -463,6 +522,14 @@ public class MadParticle extends TextureSheetParticle {
                 }
             }
         }
+    }
+    private static ParticleRenderTypes getRenderTypeEnum(ParticleRenderType type) {
+        for (ParticleRenderTypes e : ParticleRenderTypes.values()) {
+            if (ParticleRenderTypesProxy.getType(e) == type) {
+                return e;
+            }
+        }
+        return ParticleRenderTypes.INSTANCED;
     }
 
     public void setSpriteFromAgeReversed(SpriteSet pSprite) {
@@ -709,7 +776,8 @@ public class MadParticle extends TextureSheetParticle {
                             op.rollSpeed(),
                             op.xDeflection(), op.xDeflectionAfterCollision(), op.zDeflection(), op.zDeflectionAfterCollision(),
                             op.bloomFactor(),
-                            op.meta()
+                            op.meta(),
+                            particleType
                     );
                 }
             }

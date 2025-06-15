@@ -15,6 +15,7 @@ import static cn.ussshenzhou.madparticle.particle.enums.MetaKeys.Util.*;
  */
 
 public enum MetaKeys {
+    TRAIL_INTERVAL("trailInterval", IntegerArgumentType.integer(0)),
     TADA("tada", BOOLEAN),
     DAMAGE_ON_HIT("damageOnHit", IntegerArgumentType.integer(1)),
     DX("dx", EXPRESSION_ARGUMENT),
@@ -44,6 +45,7 @@ public enum MetaKeys {
 
     public static @Nullable MetaKeys fromString(String key) {
         return switch (key) {
+            case "trailInterval" -> TRAIL_INTERVAL;
             case "tada" -> TADA;
             case "damageOnHit" -> DAMAGE_ON_HIT;
             case "disappearOnCollisionEntity" -> DISAPPEAR_ON_COLLISION_ENTITY;
