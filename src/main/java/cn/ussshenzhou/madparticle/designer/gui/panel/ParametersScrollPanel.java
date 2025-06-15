@@ -151,6 +151,15 @@ public class ParametersScrollPanel extends TScrollPanel {
             scaleBegin = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.scale_begin"), FloatArgumentType.floatArg()),
             scaleEnd = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.scale_end"), FloatArgumentType.floatArg());
 
+    // trail
+    public final TTitledCycleButton<Boolean> trail = new TTitledCycleButton<>(Component.translatable("gui.mp.de.helper.trail"));
+    public final TTitledSimpleConstrainedEditBox
+            trailLife = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail_life"), IntegerArgumentType.integer(0)),
+            trailAmount = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail_amount"), IntegerArgumentType.integer(0)),
+            trailR = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail_r"), FloatArgumentType.floatArg()),
+            trailG = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail_g"), FloatArgumentType.floatArg()),
+            trailB = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail_b"), FloatArgumentType.floatArg());
+
     //meta
     public final MetaParameterPanel metaPanel = new MetaParameterPanel();
 
@@ -164,6 +173,7 @@ public class ParametersScrollPanel extends TScrollPanel {
         init6();
         init7();
         init8();
+        initTrail();
         //setChild(true);
         initTooltip();
         this.add(metaPanel);
@@ -300,6 +310,18 @@ public class ParametersScrollPanel extends TScrollPanel {
         this.addAll(bloomStrength, alpha, scale, alphaBegin, alphaEnd, scaleBegin, scaleEnd);
     }
 
+    public void initTrail() {
+        trail.addElement(Boolean.TRUE, b -> toggleTrail(true));
+        trail.addElement(Boolean.FALSE, b -> toggleTrail(false));
+        trail.getComponent().select(Boolean.FALSE);
+        this.addAll(trail, trailLife, trailAmount, trailR, trailG, trailB);
+        toggleTrail(false);
+    }
+
+    private void toggleTrail(boolean enable) {
+        Stream.of(trailLife, trailAmount, trailR, trailG, trailB).forEach(t -> t.setVisibleT(enable));
+    }
+
     @Override
     public void layout() {
         int xGap = 5;
@@ -391,9 +413,16 @@ public class ParametersScrollPanel extends TScrollPanel {
         LayoutHelper.BLeftOfA(alphaEnd, xGap, scale, stdTitledEditBox);
         LayoutHelper.BLeftOfA(alphaBegin, xGap, alphaEnd);
         LayoutHelper.BLeftOfA(alpha, xGap, alphaBegin, stdTitledButton);
+        //lane 9 - trail
+        LayoutHelper.BBottomOfA(trail, yGap, bloomStrength, stdTitledButton);
+        LayoutHelper.BRightOfA(trailLife, xGap, trail, stdTitledEditBox);
+        LayoutHelper.BRightOfA(trailAmount, xGap, trailLife, stdTitledEditBox);
+        LayoutHelper.BRightOfA(trailR, xGap, trailAmount, stdTitledEditBox);
+        LayoutHelper.BRightOfA(trailG, xGap, trailR, stdTitledEditBox);
+        LayoutHelper.BRightOfA(trailB, xGap, trailG, stdTitledEditBox);
         //meta
         metaPanel.passGap(xGap, yGap);
-        LayoutHelper.BBottomOfA(metaPanel, 2 * yGap, bloomStrength, getUsableWidth() - xGap, metaPanel.getPreferredSize().y);
+        LayoutHelper.BBottomOfA(metaPanel, 2 * yGap, trail, getUsableWidth() - xGap, metaPanel.getPreferredSize().y);
         super.layout();
     }
 
@@ -494,6 +523,8 @@ public class ParametersScrollPanel extends TScrollPanel {
                 ifClearThenSet(accessor.getAlpha(), alphaBegin, alphaEnd);
                 ifClearThenSet(String.format("%.2f", (accessor.getBbHeight() + accessor.getBbWidth()) / 2 / 0.2), scaleBegin, scaleEnd);
                 ifClearThenSet(bloomStrength, isChild ? "=" : "1");
+                trail.getComponent().select(Boolean.FALSE);
+                Stream.of(trailLife, trailAmount, trailR, trailG, trailB).forEach(e -> e.getComponent().setValue(""));
             }
         } catch (Exception ignored) {
         }
@@ -547,7 +578,20 @@ public class ParametersScrollPanel extends TScrollPanel {
         Stream.of(scaleBegin, scaleEnd).forEach(titled -> append(builder, titled));
         append(builder, scale);
         append(builder, whoCanSee.getComponent().getEditBox(), "@a");
-        metaPanel.wrap(builder);
+        StringBuilder meta = new StringBuilder();
+        metaPanel.wrap(meta);
+        if (trail.getComponent().getSelected() != null && trail.getComponent().getSelected().getContent()) {
+            int insert = meta.length() - 1;
+            if (insert > 1) {
+                meta.insert(insert, ',');
+            }
+            meta.insert(insert, "\"trail\":1,\"trailLife\":" + trailLife.getComponent().getValue()
+                    + ",\"trailAmount\":" + trailAmount.getComponent().getValue()
+                    + ",\"trailR\":" + trailR.getComponent().getValue()
+                    + ",\"trailG\":" + trailG.getComponent().getValue()
+                    + ",\"trailB\":" + trailB.getComponent().getValue());
+        }
+        builder.append(meta);
         return builder.toString();
     }
 
