@@ -5,6 +5,7 @@ import cn.ussshenzhou.madparticle.particle.enums.ChangeMode;
 import cn.ussshenzhou.madparticle.particle.enums.ParticleRenderTypes;
 import cn.ussshenzhou.madparticle.particle.enums.SpriteFrom;
 import cn.ussshenzhou.madparticle.particle.enums.MetaKeys;
+import com.google.gson.JsonObject;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.TagParser;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -93,6 +95,123 @@ public record MadParticleOption(int targetParticle, SpriteFrom spriteFrom, int l
                 xDeflection, xDeflectionAfterCollision, zDeflection, zDeflectionAfterCollision,
                 bloomFactor, meta
         );
+    }
+
+    public JsonObject toJson() {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("targetParticle", targetParticle);
+        obj.addProperty("spriteFrom", spriteFrom.name());
+        obj.addProperty("lifeTime", lifeTime);
+        obj.addProperty("alwaysRender", alwaysRender.name());
+        obj.addProperty("amount", amount);
+        obj.addProperty("px", px);
+        obj.addProperty("py", py);
+        obj.addProperty("pz", pz);
+        obj.addProperty("xDiffuse", xDiffuse);
+        obj.addProperty("yDiffuse", yDiffuse);
+        obj.addProperty("zDiffuse", zDiffuse);
+        obj.addProperty("vx", vx);
+        obj.addProperty("vy", vy);
+        obj.addProperty("vz", vz);
+        obj.addProperty("vxDiffuse", vxDiffuse);
+        obj.addProperty("vyDiffuse", vyDiffuse);
+        obj.addProperty("vzDiffuse", vzDiffuse);
+        obj.addProperty("friction", friction);
+        obj.addProperty("gravity", gravity);
+        obj.addProperty("collision", collision.name());
+        obj.addProperty("bounceTime", bounceTime);
+        obj.addProperty("horizontalRelativeCollisionDiffuse", horizontalRelativeCollisionDiffuse);
+        obj.addProperty("verticalRelativeCollisionBounce", verticalRelativeCollisionBounce);
+        obj.addProperty("afterCollisionFriction", afterCollisionFriction);
+        obj.addProperty("afterCollisionGravity", afterCollisionGravity);
+        obj.addProperty("interactWithEntity", interactWithEntity.name());
+        obj.addProperty("horizontalInteractFactor", horizontalInteractFactor);
+        obj.addProperty("verticalInteractFactor", verticalInteractFactor);
+        obj.addProperty("renderType", renderType.name());
+        obj.addProperty("r", r);
+        obj.addProperty("g", g);
+        obj.addProperty("b", b);
+        obj.addProperty("beginAlpha", beginAlpha);
+        obj.addProperty("endAlpha", endAlpha);
+        obj.addProperty("alphaMode", alphaMode.name());
+        obj.addProperty("beginScale", beginScale);
+        obj.addProperty("endScale", endScale);
+        obj.addProperty("scaleMode", scaleMode.name());
+        obj.addProperty("haveChild", haveChild);
+        if (haveChild && child != null) {
+            obj.add("child", child.toJson());
+        }
+        obj.addProperty("rollSpeed", rollSpeed);
+        obj.addProperty("xDeflection", xDeflection);
+        obj.addProperty("xDeflectionAfterCollision", xDeflectionAfterCollision);
+        obj.addProperty("zDeflection", zDeflection);
+        obj.addProperty("zDeflectionAfterCollision", zDeflectionAfterCollision);
+        obj.addProperty("bloomFactor", bloomFactor);
+        obj.addProperty("meta", meta.toString());
+        return obj;
+    }
+
+    public static MadParticleOption fromJson(JsonObject obj) {
+        int targetParticle = obj.get("targetParticle").getAsInt();
+        SpriteFrom spriteFrom = SpriteFrom.valueOf(obj.get("spriteFrom").getAsString());
+        int lifeTime = obj.get("lifeTime").getAsInt();
+        InheritableBoolean alwaysRender = InheritableBoolean.valueOf(obj.get("alwaysRender").getAsString());
+        int amount = obj.get("amount").getAsInt();
+        double px = obj.get("px").getAsDouble();
+        double py = obj.get("py").getAsDouble();
+        double pz = obj.get("pz").getAsDouble();
+        float xDiffuse = obj.get("xDiffuse").getAsFloat();
+        float yDiffuse = obj.get("yDiffuse").getAsFloat();
+        float zDiffuse = obj.get("zDiffuse").getAsFloat();
+        double vx = obj.get("vx").getAsDouble();
+        double vy = obj.get("vy").getAsDouble();
+        double vz = obj.get("vz").getAsDouble();
+        float vxDiffuse = obj.get("vxDiffuse").getAsFloat();
+        float vyDiffuse = obj.get("vyDiffuse").getAsFloat();
+        float vzDiffuse = obj.get("vzDiffuse").getAsFloat();
+        float friction = obj.get("friction").getAsFloat();
+        float gravity = obj.get("gravity").getAsFloat();
+        InheritableBoolean collision = InheritableBoolean.valueOf(obj.get("collision").getAsString());
+        int bounceTime = obj.get("bounceTime").getAsInt();
+        float horizontalRelativeCollisionDiffuse = obj.get("horizontalRelativeCollisionDiffuse").getAsFloat();
+        float verticalRelativeCollisionBounce = obj.get("verticalRelativeCollisionBounce").getAsFloat();
+        float afterCollisionFriction = obj.get("afterCollisionFriction").getAsFloat();
+        float afterCollisionGravity = obj.get("afterCollisionGravity").getAsFloat();
+        InheritableBoolean interactWithEntity = InheritableBoolean.valueOf(obj.get("interactWithEntity").getAsString());
+        float horizontalInteractFactor = obj.get("horizontalInteractFactor").getAsFloat();
+        float verticalInteractFactor = obj.get("verticalInteractFactor").getAsFloat();
+        ParticleRenderTypes renderType = ParticleRenderTypes.valueOf(obj.get("renderType").getAsString());
+        float r = obj.get("r").getAsFloat();
+        float g = obj.get("g").getAsFloat();
+        float b = obj.get("b").getAsFloat();
+        float beginAlpha = obj.get("beginAlpha").getAsFloat();
+        float endAlpha = obj.get("endAlpha").getAsFloat();
+        ChangeMode alphaMode = ChangeMode.valueOf(obj.get("alphaMode").getAsString());
+        float beginScale = obj.get("beginScale").getAsFloat();
+        float endScale = obj.get("endScale").getAsFloat();
+        ChangeMode scaleMode = ChangeMode.valueOf(obj.get("scaleMode").getAsString());
+        boolean haveChild = obj.get("haveChild").getAsBoolean();
+        MadParticleOption child = haveChild && obj.has("child") ? fromJson(obj.getAsJsonObject("child")) : null;
+        float rollSpeed = obj.get("rollSpeed").getAsFloat();
+        float xDeflection = obj.get("xDeflection").getAsFloat();
+        float xDeflectionAfterCollision = obj.get("xDeflectionAfterCollision").getAsFloat();
+        float zDeflection = obj.get("zDeflection").getAsFloat();
+        float zDeflectionAfterCollision = obj.get("zDeflectionAfterCollision").getAsFloat();
+        float bloomFactor = obj.get("bloomFactor").getAsFloat();
+        String metaStr = obj.get("meta").getAsString();
+        CompoundTag meta;
+        try {
+            meta = TagParser.parseTag(metaStr);
+        } catch (Exception e) {
+            meta = new CompoundTag();
+        }
+        return new MadParticleOption(targetParticle, spriteFrom, lifeTime, alwaysRender, amount,
+                px, py, pz, xDiffuse, yDiffuse, zDiffuse, vx, vy, vz, vxDiffuse, vyDiffuse, vzDiffuse,
+                friction, gravity, collision, bounceTime, horizontalRelativeCollisionDiffuse, verticalRelativeCollisionBounce,
+                afterCollisionFriction, afterCollisionGravity, interactWithEntity, horizontalInteractFactor, verticalInteractFactor,
+                renderType, r, g, b, beginAlpha, endAlpha, alphaMode, beginScale, endScale, scaleMode,
+                haveChild, child, rollSpeed, xDeflection, xDeflectionAfterCollision, zDeflection, zDeflectionAfterCollision,
+                bloomFactor, meta);
     }
 
     private static @NotNull MadParticleOption fromNetworkF32(FriendlyByteBuf buf) {

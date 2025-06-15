@@ -41,6 +41,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.neoforged.fml.ModList;
@@ -153,6 +154,8 @@ public class ParametersScrollPanel extends TScrollPanel {
 
     //meta
     public final MetaParameterPanel metaPanel = new MetaParameterPanel();
+    public final TButton savePreset = new TButton(Component.translatable("gui.mp.de.helper.save_preset"));
+    public final TButton loadPreset = new TButton(Component.translatable("gui.mp.de.helper.load_preset"));
 
     public ParametersScrollPanel() {
         super();
@@ -167,6 +170,32 @@ public class ParametersScrollPanel extends TScrollPanel {
         //setChild(true);
         initTooltip();
         this.add(metaPanel);
+        this.add(savePreset);
+        this.add(loadPreset);
+        savePreset.setOnPress(b -> {
+            var dispatcher = new com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack>();
+            new cn.ussshenzhou.madparticle.command.MadParticleCommand(dispatcher);
+            var option = cn.ussshenzhou.madparticle.command.MadParticleCommand.assembleOption("mp" + wrap(), net.neoforged.neoforge.client.ClientCommandHandler.getSource(), dispatcher);
+            String name = target.getComponent().getEditBox().getValue();
+            if (name.isEmpty()) {
+                name = "preset";
+            }
+            try {
+                cn.ussshenzhou.madparticle.designer.ParticlePresetManager.save(name, option);
+            } catch (Exception ignored) {
+            }
+        });
+        loadPreset.setOnPress(b -> {
+            String name = target.getComponent().getEditBox().getValue();
+            if (name.isEmpty()) {
+                name = "preset";
+            }
+            try {
+                var option = cn.ussshenzhou.madparticle.designer.ParticlePresetManager.load(name);
+                applyOption(option);
+            } catch (Exception ignored) {
+            }
+        });
     }
 
     public void initTooltip() {
@@ -394,6 +423,8 @@ public class ParametersScrollPanel extends TScrollPanel {
         //meta
         metaPanel.passGap(xGap, yGap);
         LayoutHelper.BBottomOfA(metaPanel, 2 * yGap, bloomStrength, getUsableWidth() - xGap, metaPanel.getPreferredSize().y);
+        LayoutHelper.BBottomOfA(savePreset, yGap, metaPanel, BUTTON_SIZE.x, BUTTON_SIZE.y);
+        LayoutHelper.BRightOfA(loadPreset, xGap, savePreset, BUTTON_SIZE.x, BUTTON_SIZE.y);
         super.layout();
     }
 
@@ -578,6 +609,54 @@ public class ParametersScrollPanel extends TScrollPanel {
 
     private void append(StringBuilder stringBuilder, TTitledComponent<? extends TEditBox> titled, Object defaultValue) {
         append(stringBuilder, titled.getComponent(), defaultValue);
+    }
+
+    public void applyOption(cn.ussshenzhou.madparticle.particle.MadParticleOption o) {
+        target.getComponent().getEditBox().setValue(net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE.byId(o.targetParticle()).toString());
+        spriteFrom.getComponent().select(o.spriteFrom());
+        lifeTime.getComponent().setValue(String.valueOf(o.lifeTime()));
+        alwaysRender.getComponent().select(o.alwaysRender());
+        amount.getComponent().setValue(String.valueOf(o.amount()));
+        renderType.getComponent().select(o.renderType());
+        xPos.getComponent().setValue(String.valueOf(o.px()));
+        yPos.getComponent().setValue(String.valueOf(o.py()));
+        zPos.getComponent().setValue(String.valueOf(o.pz()));
+        xD.getComponent().setValue(String.valueOf(o.xDiffuse()));
+        yD.getComponent().setValue(String.valueOf(o.yDiffuse()));
+        zD.getComponent().setValue(String.valueOf(o.zDiffuse()));
+        vx.getComponent().setValue(String.valueOf(o.vx()));
+        vy.getComponent().setValue(String.valueOf(o.vy()));
+        vz.getComponent().setValue(String.valueOf(o.vz()));
+        vxD.getComponent().setValue(String.valueOf(o.vxDiffuse()));
+        vyD.getComponent().setValue(String.valueOf(o.vyDiffuse()));
+        vzD.getComponent().setValue(String.valueOf(o.vzDiffuse()));
+        collision.getComponent().select(o.collision());
+        collisionTime.getComponent().setValue(String.valueOf(o.bounceTime()));
+        horizontalCollision.getComponent().setValue(String.valueOf(o.horizontalRelativeCollisionDiffuse()));
+        verticalCollision.getComponent().setValue(String.valueOf(o.verticalRelativeCollisionBounce()));
+        friction.getComponent().setValue(String.valueOf(o.friction()));
+        friction2.getComponent().setValue(String.valueOf(o.afterCollisionFriction()));
+        gravity.getComponent().setValue(String.valueOf(o.gravity()));
+        gravity2.getComponent().setValue(String.valueOf(o.afterCollisionGravity()));
+        interact.getComponent().select(o.interactWithEntity());
+        horizontalInteract.getComponent().setValue(String.valueOf(o.horizontalInteractFactor()));
+        verticalInteract.getComponent().setValue(String.valueOf(o.verticalInteractFactor()));
+        r.getComponent().setValue(String.valueOf(o.r()));
+        g.getComponent().setValue(String.valueOf(o.g()));
+        b.getComponent().setValue(String.valueOf(o.b()));
+        alphaBegin.getComponent().setValue(String.valueOf(o.beginAlpha()));
+        alphaEnd.getComponent().setValue(String.valueOf(o.endAlpha()));
+        alpha.getComponent().select(o.alphaMode());
+        scaleBegin.getComponent().setValue(String.valueOf(o.beginScale()));
+        scaleEnd.getComponent().setValue(String.valueOf(o.endScale()));
+        scale.getComponent().select(o.scaleMode());
+        roll.getComponent().setValue(String.valueOf(o.rollSpeed()));
+        xDeflection.getComponent().setValue(String.valueOf(o.xDeflection()));
+        xDeflection2.getComponent().setValue(String.valueOf(o.xDeflectionAfterCollision()));
+        zDeflection.getComponent().setValue(String.valueOf(o.zDeflection()));
+        zDeflection2.getComponent().setValue(String.valueOf(o.zDeflectionAfterCollision()));
+        bloomStrength.getComponent().setValue(String.valueOf(o.bloomFactor()));
+        // meta is not handled for simplicity
     }
 
     private void append(StringBuilder string, TTitledCycleButton<?> button) {

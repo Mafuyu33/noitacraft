@@ -47,6 +47,24 @@ b) As a Minecraft mod developer, when you write other Minecraft mods and use thi
 
 ---
 
+## Preset format
+
+Particle presets are stored in the `presets/` folder inside your game directory. Each file contains a single JSON object produced by `MadParticleOption#toJson()`.
+An example looks like:
+
+```json
+{
+  "targetParticle": 0,
+  "spriteFrom": "RANDOM",
+  "lifeTime": 20,
+  ...
+}
+```
+
+These files can be saved and loaded in the designer GUI using the provided buttons.
+
+---
+
 ## 其他开源信息|Other Open-source Information
 
 - 使用了[exp4j](https://github.com/fasseg/exp4j)进行表达式解析。*exp4j*使用[Apache-2.0 许可证](https://github.com/fasseg/exp4j/blob/master/LICENSE)开源。
