@@ -16,11 +16,13 @@ import static cn.ussshenzhou.madparticle.particle.enums.MetaKeys.Util.*;
 
 public enum MetaKeys {
     TADA("tada", BOOLEAN),
+    DAMAGE_ON_HIT("damageOnHit", IntegerArgumentType.integer(1)),
     DX("dx", EXPRESSION_ARGUMENT),
     DY("dy", EXPRESSION_ARGUMENT),
     DZ("dz", EXPRESSION_ARGUMENT),
     LIFE_ERROR("life", IntegerArgumentType.integer()),
-    DISAPPEAR_ON_COLLISION("disappearOnCollision", IntegerArgumentType.integer(1)),
+    DISAPPEAR_ON_COLLISION_BLOCK("disappearOnCollisionBlock", IntegerArgumentType.integer(1)),
+    DISAPPEAR_ON_COLLISION_ENTITY("disappearOnCollisionEntity", IntegerArgumentType.integer(1)),
     TENET("tenet", BOOLEAN),
     LIGHT("light", EXPRESSION_ARGUMENT),
     PULSE("pulse", BOOLEAN),
@@ -43,11 +45,13 @@ public enum MetaKeys {
     public static @Nullable MetaKeys fromString(String key) {
         return switch (key) {
             case "tada" -> TADA;
+            case "damageOnHit" -> DAMAGE_ON_HIT;
+            case "disappearOnCollisionEntity" -> DISAPPEAR_ON_COLLISION_ENTITY;
+            case "disappearOnCollisionBlock" -> DISAPPEAR_ON_COLLISION_BLOCK;
             case "dx" -> DX;
             case "dy" -> DY;
             case "dz" -> DZ;
             case "life" -> LIFE_ERROR;
-            case "disappearOnCollision" -> DISAPPEAR_ON_COLLISION;
             case "tenet" -> TENET;
             case "light" -> LIGHT;
             case "pulse" -> PULSE;

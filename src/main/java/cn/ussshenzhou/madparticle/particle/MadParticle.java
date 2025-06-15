@@ -2,6 +2,7 @@ package cn.ussshenzhou.madparticle.particle;
 
 import cn.ussshenzhou.madparticle.mixin.ParticleEngineAccessor;
 import cn.ussshenzhou.madparticle.mixinproxy.ITickType;
+import cn.ussshenzhou.madparticle.network.MadParticleHurtPacket;
 import cn.ussshenzhou.madparticle.particle.enums.ChangeMode;
 import cn.ussshenzhou.madparticle.particle.enums.SpriteFrom;
 import cn.ussshenzhou.madparticle.particle.enums.TakeOver;
@@ -9,6 +10,7 @@ import cn.ussshenzhou.madparticle.util.AABBHelper;
 import cn.ussshenzhou.madparticle.api.AddParticleHelper;
 import cn.ussshenzhou.madparticle.util.MathHelper;
 import cn.ussshenzhou.madparticle.util.MovementHelper;
+import cn.ussshenzhou.t88.network.NetworkHelper;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -74,7 +76,11 @@ public class MadParticle extends TextureSheetParticle {
     private float[] dxComplex = null;
     private float[] dyComplex = null;
     private float[] dzComplex = null;
-    private int disappearOnCollision = 0;
+    private int damageOnHit = 0;
+    private int disappearOnBlockCollision = 0;
+    private int disappearOnEntityCollision = 0;
+    private int entityCollisionCount = 0;
+
     public TimeMode timeMode = TimeMode.NORMAL;
     private float[] xTrack = null;
     private float[] yTrack = null;
@@ -161,8 +167,14 @@ public class MadParticle extends TextureSheetParticle {
     private void initMetaTags() {
         handleLifeTime();
         handleDxyz();
-        if (meta.contains(DISAPPEAR_ON_COLLISION.get())) {
-            disappearOnCollision = meta.getInt(DISAPPEAR_ON_COLLISION.get());
+        if (meta.contains(DISAPPEAR_ON_COLLISION_BLOCK.get())) {
+            disappearOnBlockCollision = meta.getInt(DISAPPEAR_ON_COLLISION_BLOCK.get());
+        }
+        if (meta.contains(DISAPPEAR_ON_COLLISION_ENTITY.get())) {
+            disappearOnEntityCollision = meta.getInt(DISAPPEAR_ON_COLLISION_ENTITY.get());
+        }
+        if (meta.contains(DAMAGE_ON_HIT.get())) {
+            damageOnHit = meta.getInt(DAMAGE_ON_HIT.get());
         }
         handleLight();
         handlePreCalculate();
@@ -346,8 +358,27 @@ public class MadParticle extends TextureSheetParticle {
         tickAlphaAndSize();
         //interact with Entity
         if (interactWithEntity) {
-            LivingEntity entity = level.getNearestEntity(LivingEntity.class, TargetingConditions.forNonCombat().range(2), null, x, y, z, this.getBoundingBox().inflate(0.4));
+            //使用粒子实际碰撞箱
+            AABB aabb = this.getBoundingBox().inflate(Math.max(bbWidth, bbHeight) * 0.5);
+            LivingEntity entity = level.getNearestEntity(
+                    LivingEntity.class,
+                    TargetingConditions.forNonCombat(),
+                    null,
+                    x, y, z,
+                    aabb
+            );
             if (entity != null) {
+                //damage
+                if (damageOnHit > 0) {
+                    NetworkHelper.sendToServer(new MadParticleHurtPacket(entity.getId(), damageOnHit));
+                }
+                // entityCollision
+                if (disappearOnEntityCollision > 0) {
+                    entityCollisionCount++;
+                    if (entityCollisionCount >= disappearOnEntityCollision) {
+                        this.remove(); // 自动消失
+                    }
+                }
                 Vec3 v = entity.getDeltaMovement();
                 this.xd += v.x * random.nextFloat() * horizontalInteractFactor;
                 double y0;
@@ -510,7 +541,7 @@ public class MadParticle extends TextureSheetParticle {
         this.dxComplex = null;
         this.dyComplex = null;
         this.dzComplex = null;
-        if (disappearOnCollision > 0 && bounceCount >= disappearOnCollision) {
+        if (disappearOnBlockCollision > 0 && bounceCount >= disappearOnBlockCollision) {
             this.remove();
         }
     }
