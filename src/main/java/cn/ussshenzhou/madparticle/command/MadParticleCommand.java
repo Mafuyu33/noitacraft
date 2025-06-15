@@ -3,6 +3,7 @@ package cn.ussshenzhou.madparticle.command;
 import cn.ussshenzhou.madparticle.command.inheritable.*;
 import cn.ussshenzhou.madparticle.network.MadParticlePacket;
 import cn.ussshenzhou.madparticle.network.MadParticleTadaPacket;
+import cn.ussshenzhou.madparticle.particle.TrailEffect;
 import cn.ussshenzhou.madparticle.particle.enums.ChangeMode;
 import cn.ussshenzhou.madparticle.particle.MadParticleOption;
 import cn.ussshenzhou.madparticle.particle.enums.ParticleRenderTypes;
@@ -209,7 +210,17 @@ public class MadParticleCommand {
         Vec3 posDiffuse = ct.getArgument("spawnDiffuse", WorldCoordinates.class).getPosition(sourceStack);
         Vec3 speed = ct.getArgument("spawnSpeed", WorldCoordinates.class).getPosition(sourceStack);
         Vec3 speedDiffuse = ct.getArgument("speedDiffuse", WorldCoordinates.class).getPosition(sourceStack);
-        boolean haveChild = index != commandStrings.length - 1;
+        boolean hasNextChild = index != commandStrings.length - 1;
+        MadParticleOption nextChild = hasNextChild ? child : null;
+        if (metaTag.getBoolean("trail")) {
+            float tr = metaTag.getFloat("trailR");
+            float tg = metaTag.getFloat("trailG");
+            float tb = metaTag.getFloat("trailB");
+            int tl = metaTag.getInt("trailLife");
+            int ta = metaTag.getInt("trailAmount");
+            nextChild = TrailEffect.build(tr, tg, tb, tl, ta, nextChild);
+            hasNextChild = true;
+        }
         MadParticleOption father = new MadParticleOption(
                 BuiltInRegistries.PARTICLE_TYPE.getId(ct.getArgument("targetParticle", ParticleOptions.class).getType()),
                 ct.getArgument("spriteFrom", SpriteFrom.class),
@@ -239,8 +250,8 @@ public class MadParticleCommand {
                 ct.getArgument("beginScale", Float.class),
                 ct.getArgument("endScale", Float.class),
                 ct.getArgument("scaleMode", ChangeMode.class),
-                haveChild,
-                haveChild ? child : null,
+                hasNextChild,
+                nextChild,
                 ct.getArgument("rollSpeed", Float.class),
                 ct.getArgument("xDeflection", Float.class),
                 ct.getArgument("xDeflectionAfterCollision", Float.class),

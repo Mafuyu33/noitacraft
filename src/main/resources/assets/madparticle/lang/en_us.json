@@ -71,6 +71,12 @@
   "gui.mp.de.helper.scale": "Scale",
   "gui.mp.de.helper.scale_begin": "Initial",
   "gui.mp.de.helper.scale_end": "Final",
+  "gui.mp.de.helper.trail": "Trail",
+  "gui.mp.de.helper.trail_life": "Trail Life",
+  "gui.mp.de.helper.trail_amount": "Trail Amt.",
+  "gui.mp.de.helper.trail_r": "Trail R",
+  "gui.mp.de.helper.trail_g": "Trail G",
+  "gui.mp.de.helper.trail_b": "Trail B",
   "gui.mp.de.helper.unwrap": "Unwrap",
   "gui.mp.de.helper.bloom_factor": "Ext.Light",
 

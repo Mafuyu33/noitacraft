@@ -71,6 +71,12 @@
   "gui.mp.de.helper.scale": "大小变化",
   "gui.mp.de.helper.scale_begin": "初始大小",
   "gui.mp.de.helper.scale_end": "结束大小",
+  "gui.mp.de.helper.trail": "拖尾",
+  "gui.mp.de.helper.trail_life": "拖尾寿命",
+  "gui.mp.de.helper.trail_amount": "拖尾数量",
+  "gui.mp.de.helper.trail_r": "拖尾红",
+  "gui.mp.de.helper.trail_g": "拖尾绿",
+  "gui.mp.de.helper.trail_b": "拖尾蓝",
   "gui.mp.de.helper.unwrap": "解析",
   "gui.mp.de.helper.bloom_factor": "额外亮度",
 
