@@ -73,6 +73,8 @@
   "gui.mp.de.helper.scale_end": "Final",
   "gui.mp.de.helper.unwrap": "Unwrap",
   "gui.mp.de.helper.bloom_factor": "Ext.Light",
+  "gui.mp.de.helper.trail": "Trail",
+  "gui.mp.de.helper.trail.tooltip": "Child particle interval",
 
   "gui.mp.de.helper.x_diffuse.tooltip": "Spawn Position Error on X Axis",
   "gui.mp.de.helper.y_diffuse.tooltip": "Spawn Position Error on Y Axis",

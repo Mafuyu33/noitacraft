@@ -91,6 +91,7 @@ public class MadParticle extends TextureSheetParticle {
     private float[] alphaTrack = null;
     private float[] scaleTrack = null;
     private int[] light = null;
+    private int trailInterval = 0;
 
     @SuppressWarnings("AlibabaSwitchStatement")
     public MadParticle(ClientLevel pLevel, SpriteSet spriteSet, SpriteFrom spriteFrom,
@@ -185,6 +186,7 @@ public class MadParticle extends TextureSheetParticle {
             trailInterval = meta.getInt(TRAIL_INTERVAL.get());
         }
         handleLight();
+        handleTrail();
         handlePreCalculate();
         //keep it at last
         handleTenet();
@@ -320,8 +322,20 @@ public class MadParticle extends TextureSheetParticle {
         }
     }
 
+    private void handleTrail() {
+        if (meta.contains(TRAIL.get())) {
+            trailInterval = meta.getInt(TRAIL.get());
+            if (trailInterval <= 0) {
+                trailInterval = 1;
+            }
+        }
+    }
+
     @Override
     public void tick() {
+        if (trailInterval > 0 && child != null && age % trailInterval == 0) {
+            AddParticleHelper.addParticleClientAsync2Async(child.inheritOrContinue(this), this.roll);
+        }
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;

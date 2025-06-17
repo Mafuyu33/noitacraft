@@ -27,6 +27,7 @@ public enum MetaKeys {
     TENET("tenet", BOOLEAN),
     LIGHT("light", EXPRESSION_ARGUMENT),
     PULSE("pulse", BOOLEAN),
+    TRAIL("trail", IntegerArgumentType.integer(1)),
     PRE_CAL("preCalculate", BOOLEAN),
     HALF_PRECISION("halfPrecision", BOOLEAN),
     INDEXED("indexed", BOOLEAN);
@@ -57,6 +58,7 @@ public enum MetaKeys {
             case "tenet" -> TENET;
             case "light" -> LIGHT;
             case "pulse" -> PULSE;
+            case "trail" -> TRAIL;
             case "preCalculate" -> PRE_CAL;
             case "halfPrecision" -> HALF_PRECISION;
             case "indexed" -> INDEXED;

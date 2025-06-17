@@ -146,6 +146,7 @@ public class ParametersScrollPanel extends TScrollPanel {
             scale = new TTitledCycleButton<>(Component.translatable("gui.mp.de.helper.scale"));
     public final TTitledSimpleConstrainedEditBox
             bloomStrength = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.bloom_factor"), FloatArgumentType.floatArg(1, 255)),
+            trailInterval = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.trail"), IntegerArgumentType.integer(1)),
             alphaBegin = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.alpha_begin"), FloatArgumentType.floatArg()),
             alphaEnd = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.alpha_end"), FloatArgumentType.floatArg()),
             scaleBegin = new TTitledSimpleConstrainedEditBox(Component.translatable("gui.mp.de.helper.scale_begin"), FloatArgumentType.floatArg()),
@@ -297,7 +298,7 @@ public class ParametersScrollPanel extends TScrollPanel {
     public void init8() {
         Stream.of(ChangeMode.values()).forEach(alpha::addElement);
         Stream.of(ChangeMode.values()).forEach(scale::addElement);
-        this.addAll(bloomStrength, alpha, scale, alphaBegin, alphaEnd, scaleBegin, scaleEnd);
+        this.addAll(bloomStrength, trailInterval, alpha, scale, alphaBegin, alphaEnd, scaleBegin, scaleEnd);
     }
 
     @Override
@@ -385,6 +386,7 @@ public class ParametersScrollPanel extends TScrollPanel {
         LayoutHelper.BRightOfA(zDeflection2, xGap, zDeflection);
         //lane 8
         LayoutHelper.BBottomOfA(bloomStrength, yGap, roll, stdTitledEditBox);
+        LayoutHelper.BRightOfA(trailInterval, xGap, bloomStrength, stdTitledEditBox);
         LayoutHelper.BBottomOfA(scaleEnd, yGap, zDeflection2, stdTitledEditBox);
         LayoutHelper.BLeftOfA(scaleBegin, xGap, scaleEnd);
         LayoutHelper.BLeftOfA(scale, xGap, scaleBegin, stdTitledButton);
@@ -437,6 +439,7 @@ public class ParametersScrollPanel extends TScrollPanel {
             interact.addElement(InheritableBoolean.INHERIT);
             Stream.of(r, g, b).forEach(editBox -> editBox.getComponent().setArgument(InheritableFloatArgument.inheritableFloat()));
             bloomStrength.getComponent().setArgument(InheritableFloatArgument.inheritableFloat(1, 255));
+            trailInterval.getComponent().setArgument(InheritableIntegerArgument.inheritableInteger(1, Integer.MAX_VALUE));
             Stream.of(alpha, scale).forEach(button -> button.addElement(ChangeMode.INHERIT));
         } else {
             spriteFrom.removeElement(SpriteFrom.INHERIT);
@@ -451,6 +454,7 @@ public class ParametersScrollPanel extends TScrollPanel {
             roll.getComponent().setArgument(FloatArgumentType.floatArg());
             Stream.of(r, g, b).forEach(editBox -> editBox.getComponent().setArgument(FloatArgumentType.floatArg()));
             bloomStrength.getComponent().setArgument(FloatArgumentType.floatArg(1, 255));
+            trailInterval.getComponent().setArgument(IntegerArgumentType.integer(1));
             Stream.of(alpha, scale).forEach(button -> button.removeElement(ChangeMode.INHERIT));
         }
     }
@@ -494,6 +498,7 @@ public class ParametersScrollPanel extends TScrollPanel {
                 ifClearThenSet(accessor.getAlpha(), alphaBegin, alphaEnd);
                 ifClearThenSet(String.format("%.2f", (accessor.getBbHeight() + accessor.getBbWidth()) / 2 / 0.2), scaleBegin, scaleEnd);
                 ifClearThenSet(bloomStrength, isChild ? "=" : "1");
+                ifClearThenSet(trailInterval, 1);
             }
         } catch (Exception ignored) {
         }
@@ -542,6 +547,7 @@ public class ParametersScrollPanel extends TScrollPanel {
         append(builder, renderType);
         Stream.of(r, g, b).forEach(titled -> append(builder, titled));
         append(builder, bloomStrength, 1);
+        append(builder, trailInterval, 1);
         Stream.of(alphaBegin, alphaEnd).forEach(titled -> append(builder, titled));
         append(builder, alpha);
         Stream.of(scaleBegin, scaleEnd).forEach(titled -> append(builder, titled));
